@@ -1,5 +1,5 @@
 # Estudo-AWS-CloudFormation
-# Minha Primeira Stack AWS CloudFormation
+# Estudo sobre uma Stack AWS CloudFormation
 
 Este repositório foi criado como parte do **desafio de laboratório** de CloudFormation.  
 O objetivo é implementar uma stack mínima em AWS, documentar o processo e compartilhar insights de aprendizado.
@@ -8,8 +8,6 @@ O objetivo é implementar uma stack mínima em AWS, documentar o processo e comp
 
 O **AWS CloudFormation** é um serviço que permite **descrever e provisionar recursos da AWS usando código** (YAML ou JSON).  
 Com ele, conseguimos automatizar a criação de ambientes completos em nuvem, sem precisar clicar manualmente no console.
-
-Uma **Stack** é um **conjunto de recursos AWS** que são criados, atualizados ou deletados em conjunto.
 
 ---
 
