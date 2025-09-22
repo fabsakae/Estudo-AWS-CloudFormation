@@ -1,17 +1,9 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: >
-  Stack CloudFormation para provisionar uma arquitetura com VPC, EC2, Lambda, RDS, S3, SNS, 
-  Load Balancer e Auto Scaling. Baseado em boas práticas de segurança e escalabilidade.
-
-Parameters:
-  EnvironmentName:
-    Type: String
-    Default: "dev"
-    Description: Nome do ambiente
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Stack mínima de aplicação web em AWS com VPC, ALB, ASG, RDS, S3, Lambda, SNS e CloudWatch"
 
 Resources:
 
-  # VPC
+  # ---------------- VPC ----------------
   MyVPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -20,45 +12,123 @@ Resources:
       EnableDnsHostnames: true
       Tags:
         - Key: Name
-          Value: !Sub "${EnvironmentName}-vpc"
+          Value: MyAppVPC
 
-  # Internet Gateway
-  InternetGateway:
-    Type: AWS::EC2::InternetGateway
-    Properties:
-      Tags:
-        - Key: Name
-          Value: !Sub "${EnvironmentName}-igw"
-
-  AttachGateway:
-    Type: AWS::EC2::VPCGatewayAttachment
-    Properties:
-      VpcId: !Ref MyVPC
-      InternetGatewayId: !Ref InternetGateway
-
-  # Subnet pública
-  PublicSubnet:
+  MySubnet:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref MyVPC
       CidrBlock: 10.0.1.0/24
-      MapPublicIpOnLaunch: true
       AvailabilityZone: !Select [ 0, !GetAZs "" ]
+      MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub "${EnvironmentName}-public-subnet"
+          Value: MyAppSubnet
 
-  # NAT Gateway
-  NatEIP:
-    Type: AWS::EC2::EIP
+  # ---------------- S3 ----------------
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
     Properties:
-      Domain: vpc
+      BucketName: !Sub "myapp-bucket-${AWS::AccountId}"
 
-  NatGateway:
-    Type: AWS::EC2::NatGateway
+  # ---------------- SNS ----------------
+  MySNSTopic:
+    Type: AWS::SNS::Topic
     Properties:
-      AllocationId: !GetAtt NatEIP.AllocationId
-      SubnetId: !Ref PublicSubnet
+      DisplayName: "MyApp Notifications"
+      TopicName: "myapp-topic"
+
+  # ---------------- Lambda ----------------
+  MyLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: "MyAppLambda"
+      Handler: index.handler
+      Runtime: python3.9
+      Role: arn:aws:iam::123456789012:role/MyLambdaRole   # substitua pelo ARN real
+      Code:
+        ZipFile: |
+          def handler(event, context):
+              print("Hello from Lambda")
+
+  # ---------------- Security Group ----------------
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Allow HTTP"
+      VpcId: !Ref MyVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  # ---------------- Application Load Balancer ----------------
+  MyALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Subnets:
+        - !Ref MySubnet
+      SecurityGroups:
+        - !Ref MySecurityGroup
+      Type: application
       Tags:
         - Key: Name
-          Value: !Sub "${EnvironmentName}-natgw"
+          Value: MyAppALB
+
+  # ---------------- Auto Scaling Group ----------------
+  MyLaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId: ami-1234567890abcdef0   # Substitua pela AMI válida
+      InstanceType: t2.micro
+      SecurityGroups:
+        - !Ref MySecurityGroup
+
+  MyAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier:
+        - !Ref MySubnet
+      LaunchConfigurationName: !Ref MyLaunchConfig
+      MinSize: "1"
+      MaxSize: "2"
+      DesiredCapacity: "1"
+
+  # ---------------- RDS ----------------
+  MyDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceClass: db.t3.micro
+      AllocatedStorage: "20"
+      Engine: mysql
+      MasterUsername: admin
+      MasterUserPassword: Admin123456    # apenas exemplo! usar Secrets Manager no real
+      VPCSecurityGroups:
+        - !Ref MySecurityGroup
+      DBSubnetGroupName: !Ref MyDBSubnetGroup
+
+  MyDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: "Subnets for RDS"
+      SubnetIds:
+        - !Ref MySubnet
+
+  # ---------------- CloudWatch ----------------
+  MyAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: "Alerta quando CPU EC2 > 70%"
+      Namespace: AWS/EC2
+      MetricName: CPUUtilization
+      Dimensions:
+        - Name: AutoScalingGroupName
+          Value: !Ref MyAutoScalingGroup
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 70
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions:
+        - !Ref MySNSTopic
