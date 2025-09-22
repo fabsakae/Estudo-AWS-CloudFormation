@@ -67,6 +67,7 @@ Envia notificações automáticas para tópicos ou assinantes, útil para alerta
 
 Amazon CloudWatch
 Monitora métricas e logs da aplicação, permitindo criar alarmes e visualizar o desempenho dos recursos.
+
 ---
 
 ## Diagrama da Stack
