@@ -31,10 +31,46 @@ Essa stack é um **modelo clássico de aplicação web/API em nuvem**, que inclu
 - **Serverless** → AWS Lambda  
 - **Mensageria** → Amazon SNS  
 - **Monitoramento** → Amazon CloudWatch  
+Componentes e suas funções:
+VPC (Virtual Private Cloud)
+Cria uma rede isolada para os recursos da aplicação, garantindo controle sobre IPs, subnets e rotas.
 
+Subnets públicas e privadas
+Permitem separar recursos expostos à internet (como o Load Balancer) dos internos (como o banco de dados).
+
+Internet Gateway e NAT Gateway
+O Internet Gateway permite acesso público à internet, enquanto o NAT Gateway permite que instâncias privadas façam chamadas externas com segurança.
+
+Security Groups
+Controlam o tráfego de rede permitido para cada recurso, funcionando como firewalls virtuais.
+
+Application Load Balancer (ALB)
+Distribui o tráfego entre múltiplas instâncias EC2, garantindo alta disponibilidade e escalabilidade.
+
+Auto Scaling Group (ASG)
+Ajusta automaticamente a quantidade de instâncias EC2 com base na demanda, otimizando custo e performance.
+
+Amazon EC2
+Executa a aplicação principal em servidores virtuais configuráveis.
+
+Amazon RDS (MySQL)
+Banco de dados relacional gerenciado, usado para armazenar dados da aplicação com alta disponibilidade.
+
+Amazon S3
+Armazena arquivos estáticos, backups ou dados da aplicação de forma segura e escalável.
+
+AWS Lambda
+Executa funções serverless para tarefas específicas, como processamento de eventos ou integração com outros serviços.
+
+Amazon SNS (Simple Notification Service)
+Envia notificações automáticas para tópicos ou assinantes, útil para alertas e integrações.
+
+Amazon CloudWatch
+Monitora métricas e logs da aplicação, permitindo criar alarmes e visualizar o desempenho dos recursos.
 ---
 
 ## Diagrama da Stack
+O diagrama abaixo representa visualmente como os componentes se conectam:
 
 ```mermaid
 flowchart TB
