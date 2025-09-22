@@ -61,4 +61,11 @@ flowchart TB
     EC2 -->|Logs| CW[CloudWatch]
     Lambda -->|Logs| CW
     ALB -->|Logs| CW
+```
+## Template CloudFormation
+
+O arquivo `template.yaml` contém a definição da infraestrutura descrita neste repositório.  
+Ele provisiona recursos como VPC, Subnet, Internet Gateway, NAT Gateway e configurações básicas para uma arquitetura escalável.
+
+> Este template é usado como base para estudo e não está pronto para produção.
 
