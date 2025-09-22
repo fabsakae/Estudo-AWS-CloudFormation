@@ -67,5 +67,5 @@ flowchart TB
 O arquivo `template.yaml` contém a definição da infraestrutura descrita neste repositório.  
 Ele provisiona recursos como VPC, Subnet, Internet Gateway, NAT Gateway e configurações básicas para uma arquitetura escalável.
 
-> Este template é usado como base para estudo e não está pronto para produção.
+> Este template contém valores fictícios (como AMI e ARN) e não está pronto para produção.
 
